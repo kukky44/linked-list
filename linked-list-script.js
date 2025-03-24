@@ -41,7 +41,8 @@ const codeSnippets = {
     'public void remove(int value) {\n    if(head == null) return;\n    \n    if(head.data == value) {\n        head = head.next;\n        return;\n    }\n    \n    Node prev = head;\n    Node current = head.next;\n    while(current != null) {\n        <span class="highlighted">if(current.data == value) {</span>\n            prev.next = current.next;\n            return;\n        }\n        prev = current;\n        current = current.next;\n    }\n}',
     'public void remove(int value) {\n    if(head == null) return;\n    \n    if(head.data == value) {\n        head = head.next;\n        return;\n    }\n    \n    Node prev = head;\n    Node current = head.next;\n    while(current != null) {\n        if(current.data == value) {\n            prev.next = current.next;\n            return;\n        }\n        prev = current;\n        current = current.next;\n    }\n}',
     '',
-  ]
+  ],
+  removeFromHead: 'public void remove(int value) {\n    if(head == null) return;\n    \n    if(head.data == value) {\n        <span class="highlighted">head = head.next;</span>\n        return;\n    }\n    \n    Node prev = head;\n    Node current = head.next;\n    while(current != null) {\n        if(current.data == value) {\n            prev.next = current.next;\n            return;\n        }\n        prev = current;\n        current = current.next;\n    }\n}',
 };
 
 const stepDescDiv = document.getElementById('step-description');
@@ -49,6 +50,7 @@ const nextBtn = document.getElementById('next-btn');
 const prevBtn = document.getElementById('prev-btn');
 const addBtn = document.querySelectorAll('.add-btn');
 const removeBtn = document.querySelectorAll('.remove-btn')
+const codeDisplay = document.getElementById('code-display');
 
 // Step descriptions
 const stepDescriptions = {
@@ -65,8 +67,10 @@ const stepDescriptions = {
     'Initialize prev pointer to head and current pointer to head.next',
     'Loop through the list',
     'Check if the current node contains the target value',
-    'Node containing target value is removed from the list'
+    'Node containing target value is removed from the list',
   ],
+  removeFromHead: 'If the head contains the target value, make “head” point to the next Node',
+  removed: 'The node is removed from the list',
 };
 
 // P5 sketch
@@ -134,6 +138,7 @@ let sketch = function (p) {
 
     // Draw nodes
     let current = linkedList.head;
+    let currPointer = 0;
     let count = 0;
     let prev = { x: listDefaultX, y: listDefaultY };
     let strokeSize = 1;
@@ -166,11 +171,11 @@ let sketch = function (p) {
         }
 
         if(animationState.step === 3 || animationState.step === 4) {
-          if(count === 0) {
+          if(count === currPointer) {
             strokeColor = p.color(88, 237, 167);
             fillColor = p.color(88, 237, 167);
           }
-          if(count === 1) {
+          if(count === currPointer + 1) {
             strokeColor = focusedColor;
             fillColor = focusedColor;
           }
@@ -238,21 +243,27 @@ let sketch = function (p) {
       if(animationState.operation === 'add' && animationState.step === 3) {
         strokeC = focusedColor;
       }
-      const lineEndX = listDefaultX + nodeWidth / 2;
-      p.push();
-      p.stroke(strokeC);
-      p.line(headX + headWidth / 2, headY + headHeight, lineEndX, listDefaultY);
-      p.line(lineEndX, listDefaultY, lineEndX + 5, listDefaultY - 5);
-      p.line(lineEndX, listDefaultY, lineEndX - 5, listDefaultY - 5);
-      p.pop();
+
+      if(animationState.operation === 'remove' && isHeadTarget(animationState.value) && animationState.step === animationState.maxSteps - 1) {
+        console.log('removing')
+        const lineEndX = listDefaultX + nodeWidth * 2 + spacing;
+        p.push();
+        p.stroke(focusedColor);
+        p.line(headX + headWidth / 2, headY + headHeight, lineEndX, listDefaultY);
+        p.pop();
+      } else {
+        const lineEndX = listDefaultX + nodeWidth / 2;
+        p.push();
+        p.stroke(strokeC);
+        p.line(headX + headWidth / 2, headY + headHeight, lineEndX, listDefaultY);
+        p.line(lineEndX, listDefaultY, lineEndX + 5, listDefaultY - 5);
+        p.line(lineEndX, listDefaultY, lineEndX - 5, listDefaultY - 5);
+        p.pop();
+      }
     }
 
     // Draw new node if animating
     if (animationState.operation && animationState.step > 0) {
-      let description =
-        stepDescriptions[animationState.operation][animationState.step];
-
-      stepDescDiv.textContent = description;
 
       if(animationState.operation === 'add'){
         const newNodeX = 140;
@@ -311,20 +322,23 @@ function removeHead() {
 
 // Remove a node from the linked list
 function removeNode(value) {
-  if (linkedList.head === null) return;
+  const currHead = linkedList.head;
+  if(currHead == null) return;
 
-  if (linkedList.head.data === value) {
-    return;
+  if(currHead.data == value) {
+      linkedList.head = currHead.next;
+      return;
   }
 
-  let current = linkedList.head;
-  while (current.next !== null && current.next.data !== value) {
+  prev = currHead;
+  current = currHead.next;
+  while(current != null) {
+    if(current.data == value) {
+        prev.next = current.next;
+        return;
+    }
+    prev = current;
     current = current.next;
-  }
-
-  if (current.next !== null) {
-    current.next = current.next.next;
-    linkedList.size--;
   }
 }
 
@@ -334,7 +348,8 @@ function startAddAnimation(value) {
   animationState.operation = 'add';
   animationState.value = value;
   animationState.maxSteps = 3;
-  document.getElementById('code-display').innerHTML = codeSnippets.add[1];
+  codeDisplay.innerHTML = codeSnippets.add[1];
+  stepDescDiv.textContent = stepDescriptions.add[1];
 
   if (animationState.mode === 'animate') {
     animationState.animating = true;
@@ -348,7 +363,8 @@ function startRemoveAnimation(value) {
   animationState.operation = 'remove';
   animationState.value = value;
   animationState.maxSteps = 7;
-  document.getElementById('code-display').innerHTML = codeSnippets.remove[1];
+  codeDisplay.innerHTML = codeSnippets.remove[1];
+  stepDescDiv.textContent = stepDescriptions.remove[1];
 
   if (animationState.mode === 'animate') {
     animationState.animating = true;
@@ -368,13 +384,13 @@ function resetAnimation() {
 }
 
 function nextSnipet () {
-  if (animationState.operation === 'add') {
-    document.getElementById('code-display').innerHTML =
-      codeSnippets.add[animationState.step];
-  } else {
-    document.getElementById('code-display').innerHTML =
-      codeSnippets.remove[animationState.step];
+  let description = stepDescriptions[animationState.operation][animationState.step];
+  if(animationState.operation === 'remove' && animationState.step === 3 && isHeadTarget(animationState.value)) {
+    description = stepDescriptions.removeFromHead;
   }
+  stepDescDiv.textContent = description;
+
+  codeDisplay.innerHTML = codeSnippets[animationState.operation][animationState.step];
 }
 
 function disableStepBtns() {
@@ -387,19 +403,20 @@ function enableStepBtns() {
   prevBtn.disabled = false;
 }
 
+function enableOperationBtns() {
+  addBtn.forEach(btn => btn.disabled = false);
+  removeBtn.forEach(btn => btn.disabled = false);
+}
+
+function isHeadTarget(value) {
+  return linkedList.head.data == value;
+}
+
 // Go to next step
 function nextStep() {
   if (!animationState.operation) return;
-
   if(animationState.step === animationState.maxSteps) {
-    stepDescDiv.classList.remove('show');
-    animationState.step++;
-    nextSnipet();
-    disableStepBtns();
-    animationState.operation = null;
-    addBtn.forEach(btn => btn.disabled = false);
-    removeBtn.forEach(btn => btn.disabled = false);
-
+    finishAnimation();
     if (animationState.mode === 'animate') {
       animationState.animating = false;
     }
@@ -410,6 +427,16 @@ function nextStep() {
     stepDescDiv.classList.add('show');
     animationState.step++;
     nextSnipet();
+
+    if(animationState.operation === 'remove' && isHeadTarget(animationState.value)) {
+      if(animationState.step === 3) {
+        codeDisplay.innerHTML = codeSnippets.removeFromHead;
+        animationState.step = animationState.maxSteps - 1; // to finish the animation at the next step
+      }else if (animationState.step === animationState.maxSteps){
+        codeDisplay.innerHTML = codeSnippets.removeFromHead;
+        stepDescDiv.textContent = stepDescriptions.removed;
+      }
+    }
 
     if(animationState.animating) disableStepBtns();
     else enableStepBtns();
@@ -422,6 +449,14 @@ function nextStep() {
       }
     }
   }
+}
+
+function finishAnimation() {
+  stepDescDiv.classList.remove('show');
+  disableStepBtns();
+  enableOperationBtns();
+  codeDisplay.innerHTML = '';
+  animationState.operation = null;
 }
 
 function prevStep() {
@@ -441,11 +476,11 @@ function prevStep() {
     animationState.step--;
 
     if (animationState.operation === 'add') {
-      document.getElementById('code-display').innerHTML =
+      codeDisplay.innerHTML =
         codeSnippets.add[animationState.step];
       if(animationState.step === 2) removeHead();
     } else {
-      document.getElementById('code-display').innerHTML =
+      codeDisplay.innerHTML =
         codeSnippets.remove[animationState.step];
     }
   }
