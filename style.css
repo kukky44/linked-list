@@ -87,8 +87,8 @@ button:hover {
 
 .step-description {
   position: absolute;
-  top: 45px;
-  left: 72%;
+  top: 68px;
+  left: 74%;
   background-color: #ffffff;
   padding: 12px;
   font-size: 12px;
@@ -96,6 +96,13 @@ button:hover {
   border-radius: 8px;
   box-shadow: 0px 4px 24px rgb(0 0 0 / 8%);
   display: none;
+}
+
+@media screen and (max-width: 1050px) {
+  .step-description {
+    left: 64%;
+    top: 4px;
+  }
 }
 
 .step-description.show {
