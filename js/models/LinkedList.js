@@ -108,5 +108,7 @@ class LinkedList {
     this.addNode(3);
     this.addNode(2);
     this.addNode(1);
+    this.addNode(7);
+    this.addNode(8);
   }
 }

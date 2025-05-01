@@ -79,7 +79,6 @@ class LinkedListRenderer {
     let x = NODE.DEFAULT_X;
     let y = NODE.DEFAULT_Y;
     const boxSize = NODE.WIDTH + NODE.NEXT_SIZE;
-    const spacing = NODE.SPACING;
     const animState = this.aniCon.getState();
 
     if(this.linkedList.head === null) {
@@ -125,7 +124,7 @@ class LinkedListRenderer {
       // Update position for next node
       prev.x = x;
       prev.y = y;
-      x += NODE.WIDTH + spacing;
+      x += boxSize + NODE.SPACING;
       current = current.next;
       nodeCount++;
 
@@ -151,10 +150,10 @@ class LinkedListRenderer {
     this.p.push();
     this.p.fill(COLORS.NODE_NULL);
     this.p.stroke(COLORS.NODE_STROKE);
-    this.p.rect(x, y, NODE.WIDTH, NODE.HEIGHT);
+    this.p.rect(x, y, NODE.NULL_WIDTH, NODE.HEIGHT);
     this.p.fill(COLORS.TEXT);
     this.p.noStroke();
-    this.p.text("Null", x + NODE.WIDTH / 2, y + NODE.HEIGHT / 2);
+    this.p.text("Null", x + NODE.NULL_WIDTH / 2, y + NODE.HEIGHT / 2);
     this.p.pop();
   }
 
@@ -191,9 +190,9 @@ class LinkedListRenderer {
    * @param {int} boxSize
    * @param {boolean} isNewLine
    */
-  drawRemovingConnection(nodeCount, currPointer, x, y, boxSize, isNewLine) {
+  drawRemovingConnection(nodeCount, currPointer, x, y, boxSize) {
     if(nodeCount === currPointer) {
-      const connectedX = x + boxSize * 2 + NODE.SPACING + boxSize / 2;
+      const connectedX = x + boxSize * 2 + NODE.SPACING * 2 + boxSize / 2;
       const offsetY = 17;
 
       this.p.push();
@@ -201,7 +200,27 @@ class LinkedListRenderer {
       this.p.strokeWeight(2);
       this.p.line(x + boxSize / 2, y, x + boxSize / 2, y - offsetY);
       this.p.line(x + boxSize / 2, y - offsetY, connectedX, y - offsetY);
-      this.p.line(connectedX, y - offsetY, connectedX, y);
+      this.p.pop();
+
+      // Handle when the connected node is on the new line
+      const isNewLine = x + boxSize + NODE.SPACING > CANVAS.WIDTH;
+      const isNextNew = x + ((boxSize + NODE.SPACING) * 2) > CANVAS.WIDTH;
+      const newLineX = boxSize + NODE.SPACING + NODE.DEFAULT_X + boxSize / 2;
+      const newLineY = y + NODE.HEIGHT * 2;
+
+      this.p.push();
+      this.p.stroke(COLORS.FOCUS);
+      this.p.strokeWeight(2);
+      if(isNewLine) {
+        this.p.line(0, newLineY - offsetY, newLineX, newLineY - offsetY);
+        this.p.line(newLineX, newLineY - offsetY, newLineX, newLineY);
+      } else if(isNextNew) {
+        let posX = newLineX - boxSize - NODE.SPACING;
+        this.p.line(0, newLineY - offsetY, posX, newLineY - offsetY);
+        this.p.line(posX, newLineY - offsetY, posX, newLineY);
+      } else {
+        this.p.line(connectedX, y - offsetY, connectedX, y);
+      }
       this.p.pop();
     }
   }

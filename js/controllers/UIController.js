@@ -12,6 +12,7 @@ class UIController {
     this.addBtn = document.querySelectorAll('.add-btn');
     this.removeBtn = document.querySelectorAll('.remove-btn')
     this.codeDisplay = document.getElementById('code-display');
+    this.uiInputs = document.querySelectorAll('.ui-input ');
   }
 
   /**
@@ -77,5 +78,11 @@ class UIController {
   disableOperationsBtns() {
     this.addBtn.forEach(btn => btn.disabled = true);
     this.removeBtn.forEach(btn => btn.disabled = true);
+  }
+
+  clearInputs() {
+    this.uiInputs.forEach(el => {
+      el.value = '';
+    })
   }
 }

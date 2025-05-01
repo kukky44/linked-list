@@ -235,8 +235,10 @@ class AnimationController {
     this.uiController.hideStepDesc();
     this.uiController.disableStepBtns();
     this.uiController.enableOperationBtns();
+    this.uiController.clearInputs();
     this.codeDisplayManager.clearCode();
     this.state.operation = null;
+    this.currNodePointer = 0;
   }
 
   /**

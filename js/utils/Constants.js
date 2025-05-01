@@ -23,9 +23,10 @@ const NODE = {
   WIDTH: 50,
   HEIGHT: 40,
   NEXT_SIZE: 40,
-  SPACING: 80,
+  SPACING: 40,
   DEFAULT_X: 15,
-  DEFAULT_Y: 140
+  DEFAULT_Y: 140,
+  NULL_WIDTH: 70,
 };
 
 // Head pointer dimensions and positioning
